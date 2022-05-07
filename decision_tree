@@ -1,0 +1,49 @@
+conda install pydotplus
+conda install python-graphviz
+conda install six
+
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifier
+from sklearn.model_selection import train_test_split # Import train_test_split function
+from sklearn import metrics #Import scikit-learn metrics module for accuracy calculation
+
+col_names = ['order_id','checkout_id','brand_id','retailer_id','order_amount','has_discount','fees_percentage'
+             ,'payment_cost_percentage','shipping_cost_euro','net_margin','is_profitable']
+             
+pima = pd.read_csv("C:\\Users\\Gebruiker\\Desktop\\ankorstore\\ankorstore_data.csv", header=0, names=col_names, sep=';')
+
+pima.head() #Just checking if everything is fine
+
+feature_cols = ['order_amount','has_discount', 'fees_percentage', 'shipping_cost_euro']
+X = pima[feature_cols] # Features
+y = pima.is_profitable # Target variable
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1) 
+
+# Create Decision Tree classifer object
+clf = DecisionTreeClassifier()
+
+# Train Decision Tree Classifer
+clf = clf.fit(X_train,y_train)
+
+#Predict the response for test dataset
+y_pred = clf.predict(X_test)
+
+# Model Accuracy, how often is the classifier correct?
+print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
+
+from sklearn.tree import export_graphviz
+from six import StringIO 
+from IPython.display import Image  
+import pydotplus
+
+dot_data = StringIO()
+export_graphviz(clf, out_file=dot_data,  
+                filled=True, rounded=True,
+                special_characters=True,feature_names = feature_cols,class_names=['0','1'])
+graph = pydotplus.graph_from_dot_data(dot_data.getvalue())  
+
+graph.write_png('ankor.png')
+
+Image(graph.create_png())
+
